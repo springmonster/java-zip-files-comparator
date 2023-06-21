@@ -1,5 +1,6 @@
 package com.khch;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -11,6 +12,13 @@ import static org.junit.Assert.assertTrue;
 
 public class ZipFileCSVComparatorTest {
 
+    ZipFileCSVComparator zipFileCSVComparator;
+
+    @Before
+    public void setUp() {
+        zipFileCSVComparator = new ZipFileCSVComparator();
+    }
+
     @Test
     public void testEmptySame() throws IOException, NoSuchAlgorithmException {
         String targetZipPath = getClass().getClassLoader().getResource("empty/a-empty.zip").getPath();
@@ -18,7 +26,7 @@ public class ZipFileCSVComparatorTest {
         String targetFileName = new File(targetZipPath).getName().replace(".zip", ".xlsx");
         String expectedFileName = new File(expectedZipPath).getName().replace(".zip", ".xlsx");
 
-        boolean isSame = ZipFileCSVComparator.compareCSVFilesInZip(targetZipPath, expectedZipPath, targetFileName, expectedFileName);
+        boolean isSame = zipFileCSVComparator.compareCSVFilesInZip(targetZipPath, expectedZipPath, targetFileName, expectedFileName);
         assertTrue("Empty files are same", isSame);
     }
 
@@ -29,7 +37,7 @@ public class ZipFileCSVComparatorTest {
         String targetFileName = new File(targetZipPath).getName().replace(".zip", ".xlsx");
         String expectedFileName = new File(expectedZipPath).getName().replace(".zip", ".xlsx");
 
-        boolean isSame = ZipFileCSVComparator.compareCSVFilesInZip(targetZipPath, expectedZipPath, targetFileName, expectedFileName);
+        boolean isSame = zipFileCSVComparator.compareCSVFilesInZip(targetZipPath, expectedZipPath, targetFileName, expectedFileName);
         assertTrue("Not empty files are same", isSame);
     }
 
@@ -40,7 +48,7 @@ public class ZipFileCSVComparatorTest {
         String targetFileName = new File(targetZipPath).getName().replace(".zip", ".xlsx");
         String expectedFileName = new File(expectedZipPath).getName().replace(".zip", ".xlsx");
 
-        boolean isSame = ZipFileCSVComparator.compareCSVFilesInZip(targetZipPath, expectedZipPath, targetFileName, expectedFileName);
+        boolean isSame = zipFileCSVComparator.compareCSVFilesInZip(targetZipPath, expectedZipPath, targetFileName, expectedFileName);
         assertFalse("Not empty files are not same", isSame);
     }
 
@@ -51,7 +59,7 @@ public class ZipFileCSVComparatorTest {
         String targetFileName = new File(targetZipPath).getName().replace(".zip", ".csv");
         String expectedFileName = new File(expectedZipPath).getName().replace(".zip", ".csv");
 
-        boolean isSame = ZipFileCSVComparator.compareCSVFilesInZip(targetZipPath, expectedZipPath, targetFileName, expectedFileName);
+        boolean isSame = zipFileCSVComparator.compareCSVFilesInZip(targetZipPath, expectedZipPath, targetFileName, expectedFileName);
         assertFalse("Not empty files are not same", isSame);
     }
 }
