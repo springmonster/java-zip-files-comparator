@@ -1,67 +1,47 @@
 package com.khch.steps;
 
 import com.khch.ZipFileCSVComparator;
-import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class ListStep {
+    private String targetPath;
+    private String expectedPath;
 
-    private List<String> targetFilePaths;
-    private List<String> expectedFilePaths;
+    private boolean isSame;
 
-    private final ZipFileCSVComparator zipFileCSVComparator = new ZipFileCSVComparator();
+    private ZipFileCSVComparator zipFileCSVComparator = new ZipFileCSVComparator();
 
-    @Given("a list of target file paths:")
+    @Given("a list of target file paths")
     public void a_list_of_target_file_paths(io.cucumber.datatable.DataTable dataTable) {
-        this.targetFilePaths = new ArrayList<>();
-        List<List<String>> data = dataTable.asLists(String.class);
-        for (List<String> row : data) {
-            for (String path : row) {
-                Collections.addAll(targetFilePaths, path.split(",\\s*"));
-            }
-        }
+        this.targetPath = dataTable.asList().get(0);
     }
 
-    @And("a list of expected file paths:")
+    @Given("a list of expected file paths")
     public void a_list_of_expected_file_paths(io.cucumber.datatable.DataTable dataTable) {
-        this.expectedFilePaths = new ArrayList<>();
-        List<List<String>> data = dataTable.asLists(String.class);
-        for (List<String> row : data) {
-            for (String path : row) {
-                Collections.addAll(expectedFilePaths, path.split(",\\s*"));
-            }
-        }
+        this.expectedPath = dataTable.asList().get(0);
     }
 
-    @Then("I compare the file contents")
-    public void i_compare_the_file_contents() {
-        for (int i = 0; i < targetFilePaths.size(); i++) {
-            String targetFilePath = targetFilePaths.get(i);
-            File targetFile = new File(targetFilePath);
+    @When("I compare the file contents")
+    public void iCompareTheFileContents() {
+        File targetFile = new File(targetPath);
+        File expectedFile = new File(expectedPath);
 
-            String transformedTargetFileName = targetFile.getName().replace("target", "expected");
+        String targetZipFileName = targetFile.getName().replace("target-", "");
+        String expectedZipFileName = expectedFile.getName().replace("expected-", "");
 
-            String expectedFilePath = expectedFilePaths.get(i);
-            File expectedFile = new File(expectedFilePath);
-            String expectedFileName = expectedFile.getName();
+        String targetFileName = targetZipFileName.replace(".zip", ".xlsx");
+        String expectedFileName = expectedZipFileName.replace(".zip", ".xlsx");
 
-            assert transformedTargetFileName.equals(expectedFileName);
+        isSame = zipFileCSVComparator.compareCSVFilesInZip(targetPath, expectedPath, targetFileName, expectedFileName);
+    }
 
-            String targetExcelName = targetFile.getName().replace(".zip", ".xlsx").replace("target-", "");
-            String expectedExcelName = expectedFile.getName().replace(".zip", ".xlsx").replace("expected-", "");
-
-            assert targetExcelName.equals(expectedExcelName);
-
-            if (!zipFileCSVComparator.compareCSVFilesInZip(targetFilePath, expectedFilePath, targetExcelName, expectedExcelName)) {
-                throw new RuntimeException("File contents are not same.");
-            }
-        }
-        System.out.println("File contents are same.");
+    @Then("the file contents should match")
+    public void the_file_contents_should_match(io.cucumber.datatable.DataTable dataTable) {
+        System.out.println("isSame = " + isSame);
+        System.out.println(isSame == Boolean.parseBoolean(dataTable.asList().get(0)));
     }
 }
