@@ -14,8 +14,6 @@ public class List2Step {
     private String targetFolder;
     private String expectedFolder;
 
-    private boolean isSame;
-
     private ZipFileCSVComparator zipFileCSVComparator = new ZipFileCSVComparator();
 
     @Given("target folder")
@@ -30,12 +28,15 @@ public class List2Step {
 
     @Then("compare")
     public void compare() {
+        // 获取target文件夹下的所有文件名
         File target = new File(this.targetFolder);
         File[] targetFiles = target.listFiles();
         List<String> targetNames = Arrays.stream(targetFiles)
                 .map(file -> file.getName().replace("target-", ""))
                 .collect(Collectors.toList());
 
+        // 获取expected文件夹下的所有文件名
+        // 然后过滤掉target文件夹下没有的文件名
         File expected = new File(this.expectedFolder);
         File[] expectedFiles = expected.listFiles();
         List<String> expectedNames = Arrays.stream(expectedFiles)
@@ -43,6 +44,7 @@ public class List2Step {
                 .filter(targetNames::contains)
                 .collect(Collectors.toList());
 
+        // 比较
         for (String expectedName : expectedNames) {
             boolean b = zipFileCSVComparator.compareCSVFilesInZip(this.targetFolder + File.separator + "target-" + expectedName,
                     this.expectedFolder + File.separator + "expected-" + expectedName,
