@@ -13,7 +13,7 @@ public class ListStep {
 
     private boolean isSame;
 
-    private ZipFileCSVComparator zipFileCSVComparator = new ZipFileCSVComparator();
+    private final ZipFileCSVComparator zipFileCSVComparator = new ZipFileCSVComparator();
 
     @Given("a list of target file paths")
     public void a_list_of_target_file_paths(io.cucumber.datatable.DataTable dataTable) {

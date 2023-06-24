@@ -14,7 +14,7 @@ public class List2Step {
     private String targetFolder;
     private String expectedFolder;
 
-    private ZipFileCSVComparator zipFileCSVComparator = new ZipFileCSVComparator();
+    private final ZipFileCSVComparator zipFileCSVComparator = new ZipFileCSVComparator();
 
     @Given("target folder")
     public void target_folder(io.cucumber.datatable.DataTable dataTable) {
