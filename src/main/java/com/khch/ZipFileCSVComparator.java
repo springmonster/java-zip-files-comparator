@@ -3,6 +3,8 @@ package com.khch;
 import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -12,62 +14,26 @@ public class ZipFileCSVComparator {
                                         String targetFileName, String expectedFileName) {
         try (ZipFile targetZipFile = new ZipFile(targetZipPath);
              ZipFile expectedZipFile = new ZipFile(expectedZipPath)) {
+
             ZipEntry targetZipFileEntry = targetZipFile.getEntry(targetFileName);
             ZipEntry expectedZipFileEntry = expectedZipFile.getEntry(expectedFileName);
 
             if (targetZipFileEntry == null || expectedZipFileEntry == null) {
-                throw new Exception("Files are not found in zip file.");
+                throw new FileNotFoundException("Files are not found in zip file.");
             }
 
             if (checkMD5IsSame(targetZipFile, expectedZipFile, targetZipFileEntry, expectedZipFileEntry)) {
                 return true;
             }
 
-            outputDiffContent(targetZipFile, expectedZipFile, targetZipFileEntry, expectedZipFileEntry);
+            if (compareEachLine(targetZipFile, expectedZipFile, targetZipFileEntry, expectedZipFileEntry)) {
+                return true;
+            }
 
             return false;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void outputDiffContent(ZipFile targetZipFile, ZipFile expectedZipFile, ZipEntry targetZipFileEntry, ZipEntry expectedZipFileEntry) throws IOException {
-        InputStream targetZipFileInputStream1 = targetZipFile.getInputStream(targetZipFileEntry);
-        InputStream expectedZipFileInputStream1 = expectedZipFile.getInputStream(expectedZipFileEntry);
-
-        BufferedReader targetBufferedReader = new BufferedReader(new InputStreamReader(targetZipFileInputStream1));
-        BufferedReader expectedBufferedREader = new BufferedReader(new InputStreamReader(expectedZipFileInputStream1));
-        StringBuilder diffSB = new StringBuilder();
-
-        String line1, line2;
-        int row = 0;
-        while ((line1 = targetBufferedReader.readLine()) != null && (line2 = expectedBufferedREader.readLine()) != null) {
-            row++;
-            if (!line1.equals(line2)) {
-                String[] values1 = line1.split(",");
-                String[] values2 = line2.split(",");
-                for (int i = 0; i < Math.min(values1.length, values2.length); i++) {
-                    if (!values1[i].equals(values2[i])) {
-                        diffSB.append(String.format("Row %d, Column %d: %s != %s\n", row, i + 1, values1[i], values2[i]));
-                    }
-                }
-            }
-        }
-
-        while ((line1 = targetBufferedReader.readLine()) != null) {
-            row++;
-            diffSB.append(String.format("Row %d: %s\n", row, line1));
-        }
-
-        while ((line2 = expectedBufferedREader.readLine()) != null) {
-            row++;
-            diffSB.append(String.format("Row %d: %s\n", row, line2));
-        }
-
-        System.out.println(diffSB);
-
-        targetBufferedReader.close();
-        expectedBufferedREader.close();
     }
 
     private boolean checkMD5IsSame(ZipFile targetZipFile, ZipFile expectedZipFile, ZipEntry targetZipFileEntry, ZipEntry expectedZipFileEntry) throws IOException, NoSuchAlgorithmException {
@@ -93,5 +59,76 @@ public class ZipFileCSVComparator {
             baos.write(buffer, 0, len);
         }
         return baos.toByteArray();
+    }
+
+    public boolean compareEachLine(ZipFile targetZipFile, ZipFile expectedZipFile,
+                                   ZipEntry targetZipFileEntry, ZipEntry expectedZipFileEntry) {
+        InputStream targetZipFileInputStream1 = null;
+        InputStream expectedZipFileInputStream1 = null;
+        BufferedReader targetBufferedReader = null;
+        BufferedReader expectedBufferedREader = null;
+        boolean isAllSame = true;
+
+        try {
+            targetZipFileInputStream1 = targetZipFile.getInputStream(targetZipFileEntry);
+            expectedZipFileInputStream1 = expectedZipFile.getInputStream(expectedZipFileEntry);
+
+            targetBufferedReader = new BufferedReader(new InputStreamReader(targetZipFileInputStream1));
+            expectedBufferedREader = new BufferedReader(new InputStreamReader(expectedZipFileInputStream1));
+
+            List<String> targetList = new ArrayList<>();
+            List<String> expectedList = new ArrayList<>();
+
+            String line1, line2;
+            while ((line1 = targetBufferedReader.readLine()) != null) {
+                targetList.add(line1);
+            }
+            while ((line2 = expectedBufferedREader.readLine()) != null) {
+                expectedList.add(line2);
+            }
+
+            if (targetList.size() != expectedList.size()) {
+                System.out.println("Target file row count: " + targetList.size() + " and expected file row count: " + expectedList.size());
+                return false;
+            }
+
+            for (int i = 0; i < targetList.size(); i++) {
+                String targetLine = targetList.get(i);
+                boolean isSame = false;
+                for (int j = 0; j < expectedList.size(); j++) {
+                    String expectedLine = expectedList.get(j);
+                    if (targetLine.equals(expectedLine)) {
+                        isSame = true;
+                        break;
+                    }
+                }
+                if (!isSame) {
+                    isAllSame = false;
+                    System.out.println("Diff target file row " + (i + 1) + ": " + targetLine);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                if (targetBufferedReader != null) {
+                    targetBufferedReader.close();
+                }
+                if (expectedBufferedREader != null) {
+                    expectedBufferedREader.close();
+                }
+
+                if (targetZipFileInputStream1 != null) {
+                    targetZipFileInputStream1.close();
+                }
+                if (expectedZipFileInputStream1 != null) {
+                    expectedZipFileInputStream1.close();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return isAllSame;
     }
 }
