@@ -1,9 +1,6 @@
 package com.khch;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,14 +17,19 @@ public class ZipCSVComparator {
      * @param baseLineZipPath zip文件路径
      * @return true: 两个zip文件中的csv文件内容一致; false: 两个zip文件中的csv文件内容不一致
      */
-    public boolean compareCSVFilesInZip(String targetZipPath, String baseLineZipPath) {
+    public boolean compareCSVFilesInZip(String targetZipPath, String baseLineZipPath,
+                                        String targetFileName, String baseLineFileName) {
         try (ZipFile targetZipFile = new ZipFile(targetZipPath);
              ZipFile baseLineZipFile = new ZipFile(baseLineZipPath)) {
 
-            ZipEntry targetEntry = targetZipFile.entries().nextElement();
-            ZipEntry baseLineEntry = baseLineZipFile.entries().nextElement();
+            ZipEntry targetZipFileEntry = targetZipFile.getEntry(targetFileName);
+            ZipEntry baselineZipFileEntry = baseLineZipFile.getEntry(baseLineFileName);
 
-            return readAndCompareEachLine(targetZipFile, baseLineZipFile, targetEntry, baseLineEntry);
+            if (targetZipFileEntry == null || baselineZipFileEntry == null) {
+                throw new FileNotFoundException("Files are not found in zip file.");
+            }
+
+            return readAndCompareEachLine(targetZipFile, baseLineZipFile, targetZipFileEntry, baselineZipFileEntry);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
