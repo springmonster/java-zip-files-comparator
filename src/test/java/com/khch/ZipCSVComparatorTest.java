@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * Test cases:
  * 1. target 和 baseline 都是空
  * <p>
  * 2. target 和 baseline 都不为空，不存在重复数据，且相同
