@@ -1,171 +1,166 @@
 package com.khch;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
- * Test cases:
- * 1. target 和 baseline 都是空
+ * Test cases: 1. target 和 baseline 都是空
  * <p>
- * 2. target 和 baseline 都不为空，不存在重复数据，且相同
- * 3. target 和 baseline 都不为空，不存在重复数据，且不相同
+ * 2. target 和 baseline 都不为空，不存在重复数据，且相同 3. target 和 baseline 都不为空，不存在重复数据，且不相同
  * <p>
- * 4. target 和 baseline 都不为空，存在重复数据，且相同
- * 5. target 和 baseline 都不为空，存在重复数据，且不相同
+ * 4. target 和 baseline 都不为空，存在重复数据，且相同 5. target 和 baseline 都不为空，存在重复数据，且不相同
  * <p>
- * 6. target 不为空，baseline 为空
- * 7. target 为空，baseline 不为空
+ * 6. target 不为空，baseline 为空 7. target 为空，baseline 不为空
  */
 public class ZipCSVComparatorTest {
 
-    private ZipCSVComparator zipCSVComparator;
+  private ZipCSVComparator zipCSVComparator;
 
-    @Before
-    public void setUp() {
-        zipCSVComparator = new ZipCSVComparator();
-    }
+  @Before
+  public void setUp() {
+    zipCSVComparator = new ZipCSVComparator();
+  }
 
-    @Test
-    public void testCompareEmpty() {
-        Map<String, Integer> map = new HashMap<>();
-        List<String> list = new ArrayList<>();
-        boolean compare = zipCSVComparator.compare(map, list);
-        assertTrue("Empty files are same", compare);
-    }
+  @Test
+  public void testCompareEmpty() {
+    Map<String, Integer> map = new HashMap<>();
+    List<String> list = new ArrayList<>();
+    boolean compare = zipCSVComparator.compare(map, list);
+    assertTrue("Empty files are same", compare);
+  }
 
-    @Test
-    public void testCompareSame() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("a", 1);
-        map.put("b", 1);
-        map.put("c", 1);
+  @Test
+  public void testCompareSame() {
+    Map<String, Integer> map = new HashMap<>();
+    map.put("a", 1);
+    map.put("b", 1);
+    map.put("c", 1);
 
-        List<String> list = new ArrayList<>();
-        list.add("a");
-        list.add("b");
-        list.add("c");
+    List<String> list = new ArrayList<>();
+    list.add("a");
+    list.add("b");
+    list.add("c");
 
-        boolean compare = zipCSVComparator.compare(map, list);
-        assertTrue("Not empty files are same", compare);
-    }
+    boolean compare = zipCSVComparator.compare(map, list);
+    assertTrue("Not empty files are same", compare);
+  }
 
-    @Test
-    public void testCompareTargetIsMoreThanBaseline() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("a", 1);
-        map.put("b", 1);
+  @Test
+  public void testCompareTargetIsMoreThanBaseline() {
+    Map<String, Integer> map = new HashMap<>();
+    map.put("a", 1);
+    map.put("b", 1);
 
-        List<String> list = new ArrayList<>();
-        list.add("a");
-        list.add("b");
-        list.add("c");
+    List<String> list = new ArrayList<>();
+    list.add("a");
+    list.add("b");
+    list.add("c");
 
-        boolean compare = zipCSVComparator.compare(map, list);
-        assertFalse("Files are not same", compare);
-    }
+    boolean compare = zipCSVComparator.compare(map, list);
+    assertFalse("Files are not same", compare);
+  }
 
-    @Test
-    public void testCompareBaselineIsMoreThanTarget() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("a", 1);
-        map.put("b", 1);
-        map.put("c", 1);
+  @Test
+  public void testCompareBaselineIsMoreThanTarget() {
+    Map<String, Integer> map = new HashMap<>();
+    map.put("a", 1);
+    map.put("b", 1);
+    map.put("c", 1);
 
-        List<String> list = new ArrayList<>();
-        list.add("a");
-        list.add("b");
+    List<String> list = new ArrayList<>();
+    list.add("a");
+    list.add("b");
 
-        boolean compare = zipCSVComparator.compare(map, list);
-        assertFalse("Files are not same", compare);
-    }
+    boolean compare = zipCSVComparator.compare(map, list);
+    assertFalse("Files are not same", compare);
+  }
 
-    @Test
-    public void testCompareSameWithDuplicatedContents() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("a", 2);
-        map.put("b", 2);
-        map.put("c", 2);
+  @Test
+  public void testCompareSameWithDuplicatedContents() {
+    Map<String, Integer> map = new HashMap<>();
+    map.put("a", 2);
+    map.put("b", 2);
+    map.put("c", 2);
 
-        List<String> list = new ArrayList<>();
-        list.add("a");
-        list.add("b");
-        list.add("c");
-        list.add("a");
-        list.add("b");
-        list.add("c");
+    List<String> list = new ArrayList<>();
+    list.add("a");
+    list.add("b");
+    list.add("c");
+    list.add("a");
+    list.add("b");
+    list.add("c");
 
-        boolean compare = zipCSVComparator.compare(map, list);
-        assertTrue("Not empty files are same", compare);
-    }
+    boolean compare = zipCSVComparator.compare(map, list);
+    assertTrue("Not empty files are same", compare);
+  }
 
-    @Test
-    public void testCompareTargetIsMoreThanBaselineWithDuplicatedContents() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("a", 1);
-        map.put("b", 2);
-        map.put("c", 2);
+  @Test
+  public void testCompareTargetIsMoreThanBaselineWithDuplicatedContents() {
+    Map<String, Integer> map = new HashMap<>();
+    map.put("a", 1);
+    map.put("b", 2);
+    map.put("c", 2);
 
-        List<String> list = new ArrayList<>();
-        list.add("a");
-        list.add("b");
-        list.add("c");
-        list.add("a");
-        list.add("b");
-        list.add("c");
+    List<String> list = new ArrayList<>();
+    list.add("a");
+    list.add("b");
+    list.add("c");
+    list.add("a");
+    list.add("b");
+    list.add("c");
 
-        boolean compare = zipCSVComparator.compare(map, list);
-        assertFalse("Files are not same", compare);
-    }
+    boolean compare = zipCSVComparator.compare(map, list);
+    assertFalse("Files are not same", compare);
+  }
 
-    @Test
-    public void testCompareBaselineIsMoreThanTargetWithDuplicatedContents() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("a", 2);
-        map.put("b", 2);
-        map.put("c", 2);
+  @Test
+  public void testCompareBaselineIsMoreThanTargetWithDuplicatedContents() {
+    Map<String, Integer> map = new HashMap<>();
+    map.put("a", 2);
+    map.put("b", 2);
+    map.put("c", 2);
 
-        List<String> list = new ArrayList<>();
-        list.add("a");
-        list.add("b");
-        list.add("c");
-        list.add("a");
-        list.add("b");
+    List<String> list = new ArrayList<>();
+    list.add("a");
+    list.add("b");
+    list.add("c");
+    list.add("a");
+    list.add("b");
 
-        boolean compare = zipCSVComparator.compare(map, list);
-        assertFalse("Files are not same", compare);
-    }
+    boolean compare = zipCSVComparator.compare(map, list);
+    assertFalse("Files are not same", compare);
+  }
 
-    @Test
-    public void testCompareTargetIsEmptyAndBaselineIsNotEmpty() {
-        Map<String, Integer> map = new HashMap<>();
-        map.put("a", 1);
-        map.put("b", 1);
-        map.put("c", 1);
+  @Test
+  public void testCompareTargetIsEmptyAndBaselineIsNotEmpty() {
+    Map<String, Integer> map = new HashMap<>();
+    map.put("a", 1);
+    map.put("b", 1);
+    map.put("c", 1);
 
-        List<String> list = new ArrayList<>();
+    List<String> list = new ArrayList<>();
 
-        boolean compare = zipCSVComparator.compare(map, list);
-        assertFalse("Files are not same", compare);
-    }
+    boolean compare = zipCSVComparator.compare(map, list);
+    assertFalse("Files are not same", compare);
+  }
 
-    @Test
-    public void testCompareTargetIsNotEmptyAndBaselineIsEmpty() {
-        Map<String, Integer> map = new HashMap<>();
+  @Test
+  public void testCompareTargetIsNotEmptyAndBaselineIsEmpty() {
+    Map<String, Integer> map = new HashMap<>();
 
-        List<String> list = new ArrayList<>();
-        list.add("a");
-        list.add("b");
-        list.add("c");
+    List<String> list = new ArrayList<>();
+    list.add("a");
+    list.add("b");
+    list.add("c");
 
-        boolean compare = zipCSVComparator.compare(map, list);
-        assertFalse("Files are not same", compare);
-    }
+    boolean compare = zipCSVComparator.compare(map, list);
+    assertFalse("Files are not same", compare);
+  }
 }
